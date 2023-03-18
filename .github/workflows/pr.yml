@@ -1,0 +1,36 @@
+name: PR checks
+
+on:
+  pull_request:
+    branches:
+      - main
+      - staging
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+      - run: npm install -g pnpm
+      - name: Install dependencies
+        run: pnpm install
+      - name: Lint
+        run: pnpm lint
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+      - run: npm install -g pnpm
+      - name: Install dependencies
+        run: pnpm install
+      - name: Typecheck
+        run: pnpm check-types

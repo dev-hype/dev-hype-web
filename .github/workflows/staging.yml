@@ -1,0 +1,50 @@
+name: Deploy to staging
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  lint:
+    name: Lint
+    environment: Staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+      - run: npm install -g pnpm
+      - name: Install dependencies
+        run: pnpm install
+      - name: Lint
+        run: pnpm lint
+
+  typecheck:
+    name: Typecheck
+    environment: Staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+      - run: npm install -g pnpm
+      - name: Install dependencies
+        run: pnpm install
+      - name: Typecheck
+        run: pnpm check-types
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: Staging
+    needs:
+      - lint
+      - typecheck
+    steps:
+      - uses: actions/checkout@v3
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only --config fly.staging.toml
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
